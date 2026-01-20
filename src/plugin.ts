@@ -1,12 +1,24 @@
 import streamDeck from "@elgato/streamdeck";
 
-import { IncrementCounter } from "./actions/increment-counter";
+import { ToggleMute } from "./actions/toggle-mute";
+import { ToggleDeafen } from "./actions/toggle-deafen";
+import { ToggleAway } from "./actions/toggle-away";
+import { SwitchChannel } from "./actions/switch-channel";
+import { clientManager } from "./ts3";
 
-// We can enable "trace" logging so that all messages between the Stream Deck, and the plugin are recorded. When storing sensitive information
-streamDeck.logger.setLevel("trace");
+// Set log level to info to avoid TRACE logs
+streamDeck.logger.setLevel("info");
 
-// Register the increment action.
-streamDeck.actions.registerAction(new IncrementCounter());
+// Initialize the TeamSpeak 3 client manager
+clientManager.initialize();
+
+// Register TeamSpeak 3 actions
+streamDeck.actions.registerAction(new ToggleMute());
+streamDeck.actions.registerAction(new ToggleDeafen());
+streamDeck.actions.registerAction(new ToggleAway());
+streamDeck.actions.registerAction(new SwitchChannel());
 
 // Finally, connect to the Stream Deck.
-streamDeck.connect();
+streamDeck.connect().then(() => {
+	streamDeck.logger.info("=== TeamSpeak 3 Plugin Connected ===");
+});

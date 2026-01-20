@@ -125,6 +125,21 @@ export class QueryClient {
 			.replace(/\\\\/g, "\\");
 	}
 
+	/**
+	 * Escape special characters for TeamSpeak ClientQuery protocol.
+	 * This is a static method so it can be used by actions without a client instance.
+	 */
+	static escape(str: string): string {
+		return str
+			.replace(/\\/g, "\\\\")
+			.replace(/\//g, "\\/")
+			.replace(/\|/g, "\\p")
+			.replace(/ /g, "\\s")
+			.replace(/\n/g, "\\n")
+			.replace(/\r/g, "\\r")
+			.replace(/\t/g, "\\t");
+	}
+
 	get isConnected(): boolean {
 		return this.connected;
 	}

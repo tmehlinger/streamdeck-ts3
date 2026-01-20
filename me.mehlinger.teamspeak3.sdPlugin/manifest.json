@@ -4,11 +4,68 @@
 	"Author": "Travis Mehlinger",
 	"Actions": [
 		{
-			"Name": "Counter",
-			"UUID": "me.mehlinger.teamspeak3.increment",
+			"Name": "Toggle Mute",
+			"UUID": "me.mehlinger.teamspeak3.toggle-mute",
 			"Icon": "imgs/actions/counter/icon",
-			"Tooltip": "Displays a count, which increments by one on press.",
-			"PropertyInspectorPath": "ui/increment-counter.html",
+			"Tooltip": "Toggle microphone mute in TeamSpeak 3",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				},
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Toggle Deafen",
+			"UUID": "me.mehlinger.teamspeak3.toggle-deafen",
+			"Icon": "imgs/actions/counter/icon",
+			"Tooltip": "Toggle speaker output (deafen) in TeamSpeak 3",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				},
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Toggle Away",
+			"UUID": "me.mehlinger.teamspeak3.toggle-away",
+			"Icon": "imgs/actions/counter/icon",
+			"Tooltip": "Toggle away status in TeamSpeak 3",
+			"Controllers": [
+				"Keypad"
+			],
+			"States": [
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				},
+				{
+					"Image": "imgs/actions/counter/key",
+					"TitleAlignment": "middle"
+				}
+			]
+		},
+		{
+			"Name": "Switch Channel",
+			"UUID": "me.mehlinger.teamspeak3.switch-channel",
+			"Icon": "imgs/actions/counter/icon",
+			"Tooltip": "Switch to a specific TeamSpeak 3 channel",
+			"PropertyInspectorPath": "ui/switch-channel.html",
 			"Controllers": [
 				"Keypad"
 			],
@@ -25,6 +82,7 @@
 	"CodePath": "bin/plugin.js",
 	"Description": "Enables basic interactions with TeamSpeak 3 using the ClientQuery plugin.",
 	"Icon": "imgs/plugin/marketplace",
+	"PropertyInspectorPath": "ui/global-settings.html",
 	"SDKVersion": 3,
 	"Software": {
 		"MinimumVersion": "6.9"
