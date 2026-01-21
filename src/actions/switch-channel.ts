@@ -1,6 +1,10 @@
 import streamDeck from '@elgato/streamdeck';
 import { action, KeyDownEvent, SingletonAction, WillAppearEvent } from '@elgato/streamdeck';
+
 import { clientManager, QueryClient } from '../ts3';
+
+/** Action context with display update methods. */
+type ActionContext = WillAppearEvent<ChannelSettings>['action'];
 
 /**
  * Action to switch to a specified TeamSpeak 3 channel.
@@ -8,7 +12,11 @@ import { clientManager, QueryClient } from '../ts3';
  */
 @action({ UUID: 'me.mehlinger.teamspeak3.switch-channel' })
 export class SwitchChannel extends SingletonAction<ChannelSettings> {
-    override async onWillAppear(ev: WillAppearEvent<ChannelSettings>): Promise<void> {
+    /**
+     * Handles the action appearing on the Stream Deck.
+     * @param ev - The will appear event.
+     */
+    public override async onWillAppear(ev: WillAppearEvent<ChannelSettings>): Promise<void> {
         // Set default channel name if not provided
         if (!ev.payload.settings.channelName) {
             ev.payload.settings.channelName = '';
@@ -19,7 +27,11 @@ export class SwitchChannel extends SingletonAction<ChannelSettings> {
         await this.updateDisplay(ev.action);
     }
 
-    override async onKeyDown(ev: KeyDownEvent<ChannelSettings>): Promise<void> {
+    /**
+     * Handles key down events.
+     * @param ev - The key down event.
+     */
+    public override async onKeyDown(ev: KeyDownEvent<ChannelSettings>): Promise<void> {
         const { settings } = ev.payload;
 
         if (!settings.channelName || settings.channelName.trim() === '') {
@@ -90,15 +102,23 @@ export class SwitchChannel extends SingletonAction<ChannelSettings> {
         }
     }
 
-    private async updateDisplay(action: any): Promise<void> {
-        await action.setTitle('');
+    /**
+     * Updates the display for an action.
+     * @param actionContext - The action context to update.
+     */
+    private async updateDisplay(actionContext: ActionContext): Promise<void> {
+        await actionContext.setTitle('');
     }
 }
 
-/**
- * Settings for {@link SwitchChannel}.
- */
+/** Settings for {@link SwitchChannel}. */
 type ChannelSettings = {
+    /**
+     *
+     */
     channelName?: string;
+    /**
+     *
+     */
     channelPassword?: string;
 };

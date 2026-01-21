@@ -5,28 +5,74 @@ const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_PORT = 25639;
 const TIMEOUT = 2000;
 
+/** Options for creating a QueryClient. */
 export interface QueryClientOptions {
+    /**
+     *
+     */
     host?: string;
+    /**
+     *
+     */
     port?: number;
+    /**
+     *
+     */
     apiKey?: string;
 }
 
+/** Response from a TeamSpeak query command. */
 export interface QueryResponse {
+    /**
+     *
+     */
     data: Record<string, string>[];
+    /**
+     *
+     */
     error: {
+        /**
+         *
+         */
         id: number;
+        /**
+         *
+         */
         msg: string;
     };
 }
 
+/** Client for TeamSpeak 3 ClientQuery protocol. */
 export class QueryClient {
+    /**
+     *
+     */
     private socket: net.Socket | null = null;
+    /**
+     *
+     */
     private options: Required<QueryClientOptions>;
+    /**
+     *
+     */
     private connected = false;
+    /**
+     *
+     */
     private buffer = '';
+    /**
+     *
+     */
     private responseResolve: ((data: string) => void) | null = null;
+    /**
+     *
+     */
     private commandQueue: Promise<QueryResponse> = Promise.resolve({ data: [], error: { id: 0, msg: 'ok' } });
 
+    /**
+     * Creates a new QueryClient instance.
+     * @param options - Connection options.
+     */
     constructor(options: QueryClientOptions = {}) {
         this.options = {
             host: options.host ?? DEFAULT_HOST,
@@ -35,7 +81,8 @@ export class QueryClient {
         };
     }
 
-    async connect(): Promise<void> {
+    /** Connect to the TeamSpeak ClientQuery interface. */
+    public async connect(): Promise<void> {
         return new Promise((resolve, reject) => {
             this.socket = new net.Socket();
             this.socket.setTimeout(TIMEOUT);
@@ -78,6 +125,7 @@ export class QueryClient {
         });
     }
 
+    /** Wait for the TeamSpeak welcome banner. */
     private waitForBanner(): Promise<void> {
         return new Promise((resolve) => {
             const checkBanner = () => {
@@ -92,21 +140,30 @@ export class QueryClient {
         });
     }
 
-    async disconnect(): Promise<void> {
+    /** Disconnect from the TeamSpeak ClientQuery interface. */
+    public async disconnect(): Promise<void> {
         if (this.socket && this.connected) {
             this.socket.destroy();
             this.connected = false;
         }
     }
 
-    async authenticate(apiKey: string): Promise<void> {
+    /**
+     * Authenticate with the TeamSpeak ClientQuery interface.
+     * @param apiKey - The API key to authenticate with.
+     */
+    public async authenticate(apiKey: string): Promise<void> {
         const response = await this.execute(`auth apikey=${apiKey}`);
         if (response.error.id !== 0) {
             throw new Error(`Authentication failed: ${response.error.msg}`);
         }
     }
 
-    async execute(command: string): Promise<QueryResponse> {
+    /**
+     * Execute a command on the TeamSpeak ClientQuery interface.
+     * @param command - The command to execute.
+     */
+    public async execute(command: string): Promise<QueryResponse> {
         if (!this.connected || !this.socket) {
             throw new Error('Not connected to TeamSpeak 3 ClientQuery');
         }
@@ -117,6 +174,10 @@ export class QueryClient {
         return result;
     }
 
+    /**
+     * Execute a command internally (no queueing).
+     * @param command - The command to execute.
+     */
     private executeInternal(command: string): Promise<QueryResponse> {
         return new Promise((resolve, reject) => {
             const timeout = setTimeout(() => {
@@ -144,6 +205,10 @@ export class QueryClient {
         });
     }
 
+    /**
+     * Parse a raw response from TeamSpeak.
+     * @param raw - The raw response string.
+     */
     private parseResponse(raw: string): QueryResponse {
         // TeamSpeak uses inconsistent line endings - normalize and split
         const lines = raw.replace(/\r/g, '').trim().split('\n').filter(Boolean);
@@ -156,6 +221,10 @@ export class QueryClient {
         return { data, error };
     }
 
+    /**
+     * Parse an error line from a TeamSpeak response.
+     * @param line - The error line to parse.
+     */
     private parseErrorLine(line: string): QueryResponse['error'] {
         const params = this.parseParams(line.replace(/^error\s*/, ''));
         return {
@@ -164,6 +233,10 @@ export class QueryClient {
         };
     }
 
+    /**
+     * Parse a data line from a TeamSpeak response.
+     * @param line - The data line to parse.
+     */
     private parseDataLine(line: string): Record<string, string>[] {
         return line.split('|').map((entry) => {
             const params = this.parseParams(entry);
@@ -175,6 +248,10 @@ export class QueryClient {
         });
     }
 
+    /**
+     * Parse key=value parameters from a string.
+     * @param str - The string to parse.
+     */
     private parseParams(str: string): Record<string, string> {
         const params: Record<string, string> = {};
         const regex = /(\w+)(?:=([^\s]*))?/g;
@@ -188,6 +265,10 @@ export class QueryClient {
         return params;
     }
 
+    /**
+     * Unescape TeamSpeak protocol escape sequences.
+     * @param str - The string to unescape.
+     */
     private unescape(str: string): string {
         return str
             .replace(/\\s/g, ' ')
@@ -202,8 +283,9 @@ export class QueryClient {
     /**
      * Escape special characters for TeamSpeak ClientQuery protocol.
      * This is a static method so it can be used by actions without a client instance.
+     * @param str - The string to escape.
      */
-    static escape(str: string): string {
+    public static escape(str: string): string {
         return str
             .replace(/\\/g, '\\\\')
             .replace(/\//g, '\\/')
@@ -214,7 +296,8 @@ export class QueryClient {
             .replace(/\t/g, '\\t');
     }
 
-    get isConnected(): boolean {
+    /** Whether the client is currently connected. */
+    public get isConnected(): boolean {
         return this.connected;
     }
 }

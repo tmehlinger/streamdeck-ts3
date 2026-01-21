@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "Permite interacciones básicas con TeamSpeak 3 usando el plugin ClientQuery.\n\nInteracciones compatibles:\n* cambiar canal\n* silenciar\n* ensordecer\n* alternar estado ausente\n\nPara usar este plugin, primero instala el plugin ClientQuery en TeamSpeak 3, luego copia la clave API generada en la configuración del plugin en Stream Deck.",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "Alternar silencio",
+            "Tooltip": "Silenciar o activar el micrófono en TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "Alternar ensordecimiento",
+            "Tooltip": "Silenciar o activar la salida de audio en TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "Alternar ausente",
+            "Tooltip": "Activar o desactivar el estado ausente en TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "Cambiar canal",
+            "Tooltip": "Cambiar a un canal específico de TeamSpeak 3"
+        }
+    },
+    "Localization": {
+        "ApiKey": "Clave API",
+        "ApiKeyPlaceholder": "Ingrese su clave API de ClientQuery",
+        "ApiKeyDescription": "Genere una clave API en TeamSpeak 3: Herramientas → Opciones → Addons → ClientQuery → Configuración.",
+        "Host": "Host",
+        "HostDefault": "Por defecto: 127.0.0.1",
+        "Port": "Puerto",
+        "PortDefault": "Por defecto: 25639",
+        "ChannelName": "Nombre del canal",
+        "ChannelNamePlaceholder": "ej., Lobby",
+        "ChannelNameDescription": "Ingrese el nombre exacto del canal de TeamSpeak al que desea cambiar.",
+        "ChannelPassword": "Contraseña del canal (Opcional)",
+        "ChannelPasswordPlaceholder": "Deje en blanco si no hay contraseña",
+        "ChannelPasswordDescription": "Ingrese la contraseña del canal si está protegido con contraseña.",
+        "ConnectionHeader": "Conexión TeamSpeak 3"
+    }
+}

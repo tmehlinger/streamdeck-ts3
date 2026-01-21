@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "Permet des interactions de base avec TeamSpeak 3 via le plugin ClientQuery.\n\nInteractions prises en charge :\n* changer de canal\n* couper le micro\n* couper le son\n* basculer le statut absent\n\nPour utiliser ce plugin, installez d'abord le plugin ClientQuery dans TeamSpeak 3, puis copiez la clé API générée dans les paramètres du plugin dans Stream Deck.",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "Activer/Désactiver micro",
+            "Tooltip": "Activer ou désactiver le micro dans TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "Activer/Désactiver son",
+            "Tooltip": "Activer ou désactiver la sortie audio dans TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "Activer/Désactiver absent",
+            "Tooltip": "Activer ou désactiver le statut absent dans TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "Changer de canal",
+            "Tooltip": "Passer à un canal TeamSpeak 3 spécifique"
+        }
+    },
+    "Localization": {
+        "ApiKey": "Clé API",
+        "ApiKeyPlaceholder": "Entrez votre clé API ClientQuery",
+        "ApiKeyDescription": "Générez une clé API dans TeamSpeak 3 : Outils → Options → Addons → ClientQuery → Paramètres.",
+        "Host": "Hôte",
+        "HostDefault": "Par défaut : 127.0.0.1",
+        "Port": "Port",
+        "PortDefault": "Par défaut : 25639",
+        "ChannelName": "Nom du canal",
+        "ChannelNamePlaceholder": "ex : Lobby",
+        "ChannelNameDescription": "Entrez le nom exact du canal TeamSpeak vers lequel vous souhaitez basculer.",
+        "ChannelPassword": "Mot de passe du canal (Optionnel)",
+        "ChannelPasswordPlaceholder": "Laissez vide si pas de mot de passe",
+        "ChannelPasswordDescription": "Entrez le mot de passe du canal si celui-ci est protégé.",
+        "ConnectionHeader": "Connexion TeamSpeak 3"
+    }
+}

@@ -1,31 +1,56 @@
 import streamDeck from '@elgato/streamdeck';
+
 import { QueryClient } from './query-client';
 
 const HEARTBEAT_INTERVAL = 500; // 0.5 seconds
 const INITIAL_BACKOFF_DELAY = 1000; // 1 second
 const MAX_BACKOFF_DELAY = 60000; // 60 seconds
 
-/**
- * Global settings for the TeamSpeak 3 plugin.
- */
+/** Global settings for the TeamSpeak 3 plugin. */
 export interface TS3GlobalSettings {
+    /**
+     *
+     */
     apiKey?: string;
+    /**
+     *
+     */
     host?: string;
+    /**
+     *
+     */
     port?: number;
 }
 
-/**
- * Current TeamSpeak client state.
- */
+/** Current TeamSpeak client state. */
 export interface TS3State {
+    /**
+     *
+     */
     clientId?: string;
+    /**
+     *
+     */
     channelId?: string;
+    /**
+     *
+     */
     inputMuted?: boolean;
+    /**
+     *
+     */
     outputMuted?: boolean;
+    /**
+     *
+     */
     away?: boolean;
+    /**
+     *
+     */
     awayMessage?: string;
 }
 
+/** Callback function for state change notifications. */
 export type StateChangeListener = (state: TS3State) => void;
 
 /**
@@ -34,29 +59,64 @@ export type StateChangeListener = (state: TS3State) => void;
  * Provides heartbeat to sync state with TeamSpeak.
  */
 class ClientManager {
+    /**
+     *
+     */
     private client: QueryClient | null = null;
+    /**
+     *
+     */
     private settings: TS3GlobalSettings = {};
+    /**
+     *
+     */
     private connectionPromise: Promise<QueryClient> | null = null;
+    /**
+     *
+     */
     private settingsReceived = false;
+    /**
+     *
+     */
     private settingsPromiseResolve: (() => void) | null = null;
+    /**
+     *
+     */
     private settingsPromise: Promise<void>;
+    /**
+     *
+     */
     private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+    /**
+     *
+     */
     private currentState: TS3State = {};
+    /**
+     *
+     */
     private stateListeners: StateChangeListener[] = [];
+    /**
+     *
+     */
     private backoffDelay = INITIAL_BACKOFF_DELAY;
+    /**
+     *
+     */
     private backoffTimer: ReturnType<typeof setTimeout> | null = null;
+    /**
+     *
+     */
     private backoffResolve: (() => void) | null = null;
 
+    /** Creates a new ClientManager instance. */
     constructor() {
         this.settingsPromise = new Promise((resolve) => {
             this.settingsPromiseResolve = resolve;
         });
     }
 
-    /**
-     * Initialize the client manager and listen for global settings changes.
-     */
-    initialize(): void {
+    /** Initialize the client manager and listen for global settings changes. */
+    public initialize(): void {
         streamDeck.settings.onDidReceiveGlobalSettings((ev) => {
             this.updateSettings(ev.settings as TS3GlobalSettings);
         });
@@ -70,8 +130,9 @@ class ClientManager {
 
     /**
      * Register a listener for state changes.
+     * @param listener - The listener callback to register.
      */
-    onStateChange(listener: StateChangeListener): void {
+    public onStateChange(listener: StateChangeListener): void {
         this.stateListeners.push(listener);
         // Immediately notify with current state
         if (Object.keys(this.currentState).length > 0) {
@@ -79,13 +140,12 @@ class ClientManager {
         }
     }
 
-    /**
-     * Get the current cached state.
-     */
-    getState(): TS3State {
+    /** Get the current cached state. */
+    public getState(): TS3State {
         return this.currentState;
     }
 
+    /** Start the heartbeat timer to poll TeamSpeak state. */
     private startHeartbeat(): void {
         if (this.heartbeatTimer) {
             clearInterval(this.heartbeatTimer);
@@ -101,6 +161,7 @@ class ClientManager {
         this.pollState().catch(() => {});
     }
 
+    /** Poll the current state from TeamSpeak. */
     private async pollState(): Promise<void> {
         try {
             const client = await this.getClient();
@@ -140,7 +201,7 @@ class ClientManager {
                 );
                 this.notifyStateChange();
             }
-        } catch (err) {
+        } catch {
             // Connection might be lost - clear connection promise to trigger reconnect
             if (this.client && !this.client.isConnected) {
                 streamDeck.logger.info('[TS3] Connection lost, will reconnect on next use');
@@ -149,6 +210,7 @@ class ClientManager {
         }
     }
 
+    /** Notify all registered listeners of a state change. */
     private notifyStateChange(): void {
         for (const listener of this.stateListeners) {
             try {
@@ -161,6 +223,7 @@ class ClientManager {
 
     /**
      * Update the settings and reinitialize the client if necessary.
+     * @param newSettings - The new global settings.
      */
     private async updateSettings(newSettings: TS3GlobalSettings): Promise<void> {
         this.settings = newSettings;
@@ -200,7 +263,7 @@ class ClientManager {
      * Waits for settings to be received before connecting.
      * Implements exponential backoff on connection failure.
      */
-    async getClient(): Promise<QueryClient> {
+    public async getClient(): Promise<QueryClient> {
         // Wait for settings to be received at least once
         if (!this.settingsReceived) {
             streamDeck.logger.debug('[TS3] Waiting for settings...');
@@ -236,6 +299,7 @@ class ClientManager {
 
     /**
      * Attempt to connect with exponential backoff on failure.
+     * @param client - The QueryClient to connect.
      */
     private async connectWithBackoff(client: QueryClient): Promise<QueryClient> {
         while (true) {
@@ -267,9 +331,7 @@ class ClientManager {
         }
     }
 
-    /**
-     * Wait for the current backoff delay, or until canceled.
-     */
+    /** Wait for the current backoff delay, or until canceled. */
     private waitForBackoff(): Promise<void> {
         return new Promise((resolve) => {
             this.backoffResolve = resolve;
@@ -285,7 +347,7 @@ class ClientManager {
      * Cancel the current backoff timer and retry connection immediately.
      * Call this when a user presses a button to skip the wait.
      */
-    cancelBackoffAndRetry(): void {
+    public cancelBackoffAndRetry(): void {
         if (this.backoffTimer) {
             streamDeck.logger.info('[TS3] Backoff canceled, retrying immediately');
             clearTimeout(this.backoffTimer);
@@ -304,7 +366,7 @@ class ClientManager {
      * Use this in actions to avoid queuing commands while disconnected.
      * Cancels any backoff and triggers a reconnect attempt if not connected.
      */
-    requireClient(): QueryClient {
+    public requireClient(): QueryClient {
         if (!this.client || !this.client.isConnected) {
             // Cancel backoff and trigger reconnect in background
             this.cancelBackoffAndRetry();

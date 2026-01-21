@@ -1,9 +1,9 @@
 import streamDeck from '@elgato/streamdeck';
 
-import { ToggleMute } from './actions/toggle-mute';
-import { ToggleDeafen } from './actions/toggle-deafen';
-import { ToggleAway } from './actions/toggle-away';
 import { SwitchChannel } from './actions/switch-channel';
+import { ToggleAway } from './actions/toggle-away';
+import { ToggleDeafen } from './actions/toggle-deafen';
+import { ToggleMute } from './actions/toggle-mute';
 import { clientManager } from './ts3';
 
 // Set log level

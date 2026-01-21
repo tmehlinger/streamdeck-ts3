@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "透過ClientQuery外掛程式實現與TeamSpeak 3的基本互動。\n\n支援的功能：\n* 切換頻道\n* 靜音\n* 關閉揚聲器\n* 切換離開狀態\n\n要使用此外掛程式，請先在TeamSpeak 3中安裝ClientQuery外掛程式，然後將產生的API金鑰複製到Stream Deck的外掛程式設定中。",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "切換靜音",
+            "Tooltip": "在TeamSpeak 3中切換麥克風靜音"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "切換揚聲器",
+            "Tooltip": "在TeamSpeak 3中切換揚聲器輸出"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "切換離開狀態",
+            "Tooltip": "在TeamSpeak 3中切換離開狀態"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "切換頻道",
+            "Tooltip": "切換到指定的TeamSpeak 3頻道"
+        }
+    },
+    "Localization": {
+        "ApiKey": "API金鑰",
+        "ApiKeyPlaceholder": "輸入您的ClientQuery API金鑰",
+        "ApiKeyDescription": "在TeamSpeak 3中產生API金鑰：工具 → 選項 → 外掛程式 → ClientQuery → 設定",
+        "Host": "主機",
+        "HostDefault": "預設：127.0.0.1",
+        "Port": "連接埠",
+        "PortDefault": "預設：25639",
+        "ChannelName": "頻道名稱",
+        "ChannelNamePlaceholder": "例如：大廳",
+        "ChannelNameDescription": "輸入您要切換到的TeamSpeak頻道的確切名稱。",
+        "ChannelPassword": "頻道密碼（選填）",
+        "ChannelPasswordPlaceholder": "如果沒有密碼請留空",
+        "ChannelPasswordDescription": "如果頻道有密碼保護，請輸入頻道密碼。",
+        "ConnectionHeader": "TeamSpeak 3 連線"
+    }
+}

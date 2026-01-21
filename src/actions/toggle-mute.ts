@@ -1,11 +1,6 @@
 import streamDeck from '@elgato/streamdeck';
-import {
-    action,
-    KeyDownEvent,
-    SingletonAction,
-    WillAppearEvent,
-    WillDisappearEvent,
-} from '@elgato/streamdeck';
+import { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from '@elgato/streamdeck';
+
 import { clientManager, type TS3State } from '../ts3';
 
 /**
@@ -14,12 +9,21 @@ import { clientManager, type TS3State } from '../ts3';
  */
 @action({ UUID: 'me.mehlinger.teamspeak3.toggle-mute' })
 export class ToggleMute extends SingletonAction<MuteSettings> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private visibleActions = new Set<any>();
+    /**
+     *
+     */
     private listenerRegistered = false;
+    /**
+     *
+     */
+    private visibleActions = new Map<string, KeyAction<MuteSettings>>();
 
-    override async onWillAppear(ev: WillAppearEvent<MuteSettings>): Promise<void> {
-        this.visibleActions.add(ev.action);
+    /**
+     * Handles the action appearing on the Stream Deck.
+     * @param ev - The will appear event.
+     */
+    public override async onWillAppear(ev: WillAppearEvent<MuteSettings>): Promise<void> {
+        this.visibleActions.set(ev.action.id, ev.action as KeyAction<MuteSettings>);
 
         // Register for state updates (only once)
         if (!this.listenerRegistered) {
@@ -30,24 +34,23 @@ export class ToggleMute extends SingletonAction<MuteSettings> {
         // Use current cached state if available
         const state = clientManager.getState();
         if (state.inputMuted !== undefined) {
-            await this.updateDisplay(ev.action, state.inputMuted);
+            await this.updateDisplay(ev.action as KeyAction<MuteSettings>, state.inputMuted);
         }
     }
 
-    override async onWillDisappear(ev: WillDisappearEvent<MuteSettings>): Promise<void> {
-        this.visibleActions.delete(ev.action);
+    /**
+     * Handles the action disappearing from the Stream Deck.
+     * @param ev - The will disappear event.
+     */
+    public override async onWillDisappear(ev: WillDisappearEvent<MuteSettings>): Promise<void> {
+        this.visibleActions.delete(ev.action.id);
     }
 
-    private async onStateChange(state: TS3State): Promise<void> {
-        if (state.inputMuted === undefined) return;
-
-        // Update all visible instances of this action
-        for (const action of this.visibleActions) {
-            await this.updateDisplay(action, state.inputMuted);
-        }
-    }
-
-    override async onKeyDown(ev: KeyDownEvent<MuteSettings>): Promise<void> {
+    /**
+     * Handles key down events.
+     * @param ev - The key down event.
+     */
+    public override async onKeyDown(ev: KeyDownEvent<MuteSettings>): Promise<void> {
         try {
             const client = clientManager.requireClient();
 
@@ -67,15 +70,34 @@ export class ToggleMute extends SingletonAction<MuteSettings> {
         }
     }
 
-    private async updateDisplay(action: any, isMuted: boolean): Promise<void> {
-        await action.setTitle('');
-        await action.setState(isMuted ? 1 : 0);
+    /**
+     * Handles state changes from TeamSpeak.
+     * @param state - The new TeamSpeak state.
+     */
+    private async onStateChange(state: TS3State): Promise<void> {
+        if (state.inputMuted === undefined) return;
+
+        // Update all visible instances of this action
+        for (const actionContext of this.visibleActions.values()) {
+            await this.updateDisplay(actionContext, state.inputMuted);
+        }
+    }
+
+    /**
+     * Updates the display for an action.
+     * @param actionContext - The action context to update.
+     * @param isMuted - Whether the microphone is muted.
+     */
+    private async updateDisplay(actionContext: KeyAction<MuteSettings>, isMuted: boolean): Promise<void> {
+        await actionContext.setTitle('');
+        await actionContext.setState(isMuted ? 1 : 0);
     }
 }
 
-/**
- * Settings for {@link ToggleMute}.
- */
+/** Settings for {@link ToggleMute}. */
 type MuteSettings = {
+    /**
+     *
+     */
     isMuted?: boolean;
 };

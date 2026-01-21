@@ -6,7 +6,7 @@
         {
             "Name": "Toggle Mute",
             "UUID": "me.mehlinger.teamspeak3.toggle-mute",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/mute/icon",
             "Tooltip": "Toggle microphone mute in TeamSpeak 3",
             "Controllers": ["Keypad"],
             "States": [
@@ -23,7 +23,7 @@
         {
             "Name": "Toggle Deafen",
             "UUID": "me.mehlinger.teamspeak3.toggle-deafen",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/deafen/icon",
             "Tooltip": "Toggle speaker output (deafen) in TeamSpeak 3",
             "Controllers": ["Keypad"],
             "States": [
@@ -40,7 +40,7 @@
         {
             "Name": "Toggle Away",
             "UUID": "me.mehlinger.teamspeak3.toggle-away",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/away/icon",
             "Tooltip": "Toggle away status in TeamSpeak 3",
             "Controllers": ["Keypad"],
             "States": [
@@ -57,7 +57,7 @@
         {
             "Name": "Switch Channel",
             "UUID": "me.mehlinger.teamspeak3.switch-channel",
-            "Icon": "imgs/actions/counter/icon",
+            "Icon": "imgs/actions/switch-channel/icon",
             "Tooltip": "Switch to a specific TeamSpeak 3 channel",
             "PropertyInspectorPath": "ui/switch-channel.html",
             "Controllers": ["Keypad"],
@@ -70,10 +70,11 @@
         }
     ],
     "Category": "TeamSpeak 3",
-    "CategoryIcon": "imgs/plugin/category-icon",
+    "CategoryIcon": "imgs/plugin/teamspeak",
     "CodePath": "bin/plugin.js",
-    "Description": "Enables basic interactions with TeamSpeak 3 using the ClientQuery plugin.",
-    "Icon": "imgs/plugin/marketplace",
+    "Description": "Enables basic interactions with TeamSpeak 3 using the ClientQuery plugin.\n\nSupported interactions:\n* switch channel\n* mute\n* deafen\n* toggle away status\n\nTo use this plugin, first install the ClientQuery plugin in TeamSpeak 3, then copy the API key it generates to the plugin settings in Stream Deck.",
+    "URL": "https://mehlinger.me/projects/streamdeck-ts3",
+    "Icon": "imgs/plugin/teamspeak",
     "PropertyInspectorPath": "ui/global-settings.html",
     "SDKVersion": 3,
     "Software": {

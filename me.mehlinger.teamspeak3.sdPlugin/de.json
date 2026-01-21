@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "Ermöglicht grundlegende Interaktionen mit TeamSpeak 3 über das ClientQuery-Plugin.\n\nUnterstützte Funktionen:\n* Kanal wechseln\n* Stummschalten\n* Lautsprecher deaktivieren\n* Abwesend-Status umschalten\n\nUm dieses Plugin zu verwenden, installieren Sie zuerst das ClientQuery-Plugin in TeamSpeak 3 und kopieren Sie dann den generierten API-Schlüssel in die Plugin-Einstellungen in Stream Deck.",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "Stumm umschalten",
+            "Tooltip": "Mikrofon in TeamSpeak 3 stumm schalten oder aktivieren"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "Lautsprecher umschalten",
+            "Tooltip": "Lautsprecherausgabe in TeamSpeak 3 stumm schalten oder aktivieren"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "Abwesend umschalten",
+            "Tooltip": "Abwesend-Status in TeamSpeak 3 umschalten"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "Kanal wechseln",
+            "Tooltip": "Zu einem bestimmten TeamSpeak 3-Kanal wechseln"
+        }
+    },
+    "Localization": {
+        "ApiKey": "API-Schlüssel",
+        "ApiKeyPlaceholder": "ClientQuery API-Schlüssel eingeben",
+        "ApiKeyDescription": "API-Schlüssel in TeamSpeak 3 generieren: Extras → Optionen → Addons → ClientQuery → Einstellungen.",
+        "Host": "Host",
+        "HostDefault": "Standard: 127.0.0.1",
+        "Port": "Port",
+        "PortDefault": "Standard: 25639",
+        "ChannelName": "Kanalname",
+        "ChannelNamePlaceholder": "z.B. Lobby",
+        "ChannelNameDescription": "Geben Sie den genauen Namen des TeamSpeak-Kanals ein, zu dem Sie wechseln möchten.",
+        "ChannelPassword": "Kanalpasswort (Optional)",
+        "ChannelPasswordPlaceholder": "Leer lassen, wenn kein Passwort",
+        "ChannelPasswordDescription": "Geben Sie das Kanalpasswort ein, falls der Kanal passwortgeschützt ist.",
+        "ConnectionHeader": "TeamSpeak 3-Verbindung"
+    }
+}

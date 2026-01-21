@@ -48,43 +48,59 @@
     <body>
         <div class="sdpi-wrapper">
             <div class="sdpi-item">
-                <div class="sdpi-item-label">TeamSpeak 3 API Key</div>
+                <div class="sdpi-item-label" data-localize="ApiKey">API Key</div>
                 <div class="sdpi-item-value">
-                    <input type="password" id="apiKey" placeholder="Enter your ClientQuery API key" />
+                    <input
+                        type="password"
+                        id="apiKey"
+                        data-localize-placeholder="ApiKeyPlaceholder"
+                        placeholder="Enter your ClientQuery API key"
+                    />
                 </div>
-                <div class="sdpi-item-description">
-                    You can generate an API key in TeamSpeak 3 by going to Tools → Options → Addons → ClientQuery →
-                    Settings.
+                <div class="sdpi-item-description" data-localize="ApiKeyDescription">
+                    Generate an API key in TeamSpeak 3: Tools → Options → Addons → ClientQuery → Settings.
                 </div>
             </div>
             <div class="sdpi-item">
-                <div class="sdpi-item-label">Host</div>
+                <div class="sdpi-item-label" data-localize="Host">Host</div>
                 <div class="sdpi-item-value">
                     <input type="text" id="host" placeholder="127.0.0.1" />
                 </div>
-                <div class="sdpi-item-description">Default: 127.0.0.1</div>
+                <div class="sdpi-item-description" data-localize="HostDefault">Default: 127.0.0.1</div>
             </div>
             <div class="sdpi-item">
-                <div class="sdpi-item-label">Port</div>
+                <div class="sdpi-item-label" data-localize="Port">Port</div>
                 <div class="sdpi-item-value">
                     <input type="number" id="port" placeholder="25639" />
                 </div>
-                <div class="sdpi-item-description">Default: 25639</div>
+                <div class="sdpi-item-description" data-localize="PortDefault">Default: 25639</div>
             </div>
         </div>
 
         <script>
             let websocket = null;
             let uuid = null;
+            let localization = {};
 
             function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
             	uuid = inUUID;
-            	websocket = new WebSocket('ws://127.0.0.1:' + inPort);
 
-            	websocket.onopen = function() {
+            	// Load localization from info
+            	try {
+            		const info = JSON.parse(inInfo);
+            		if (info.application && info.application.language) {
+            			loadLocalization(info.application.language);
+            		}
+            	} catch (e) {
+            		console.error("Failed to parse info:", e);
+            	}
+
+            	websocket = new WebSocket("ws://127.0.0.1:" + inPort);
+
+            	websocket.onopen = function () {
             		const json = {
             			event: inRegisterEvent,
-            			uuid: inUUID
+            			uuid: inUUID,
             		};
             		websocket.send(JSON.stringify(json));
 
@@ -92,31 +108,73 @@
             		requestGlobalSettings();
             	};
 
-            	websocket.onmessage = function(evt) {
+            	websocket.onmessage = function (evt) {
             		const jsonObj = JSON.parse(evt.data);
 
-            		if (jsonObj.event === 'didReceiveGlobalSettings') {
+            		if (jsonObj.event === "didReceiveGlobalSettings") {
             			const settings = jsonObj.payload.settings;
 
             			// Update UI with current settings
             			if (settings.apiKey) {
-            				document.getElementById('apiKey').value = settings.apiKey;
+            				document.getElementById("apiKey").value = settings.apiKey;
             			}
             			if (settings.host) {
-            				document.getElementById('host').value = settings.host;
+            				document.getElementById("host").value = settings.host;
             			}
             			if (settings.port) {
-            				document.getElementById('port').value = settings.port;
+            				document.getElementById("port").value = settings.port;
             			}
             		}
             	};
             }
 
+            function loadLocalization(language) {
+            	const langFile = language.replace("-", "_") + ".json";
+            	fetch("../" + langFile)
+            		.then((response) => response.json())
+            		.then((data) => {
+            			if (data.Localization) {
+            				localization = data.Localization;
+            				applyLocalization();
+            			}
+            		})
+            		.catch(() => {
+            			// Fall back to English
+            			fetch("../en.json")
+            				.then((response) => response.json())
+            				.then((data) => {
+            					if (data.Localization) {
+            						localization = data.Localization;
+            						applyLocalization();
+            					}
+            				})
+            				.catch((e) => console.error("Failed to load localization:", e));
+            		});
+            }
+
+            function applyLocalization() {
+            	// Apply text content
+            	document.querySelectorAll("[data-localize]").forEach((el) => {
+            		const key = el.getAttribute("data-localize");
+            		if (localization[key]) {
+            			el.textContent = localization[key];
+            		}
+            	});
+
+            	// Apply placeholders
+            	document.querySelectorAll("[data-localize-placeholder]").forEach((el) => {
+            		const key = el.getAttribute("data-localize-placeholder");
+            		if (localization[key]) {
+            			el.placeholder = localization[key];
+            		}
+            	});
+            }
+
             function requestGlobalSettings() {
             	if (websocket) {
             		const json = {
-            			event: 'getGlobalSettings',
-            			context: uuid
+            			event: "getGlobalSettings",
+            			context: uuid,
             		};
             		websocket.send(JSON.stringify(json));
             	}
@@ -125,39 +183,39 @@
             function setGlobalSettings(settings) {
             	if (websocket) {
             		const json = {
-            			event: 'setGlobalSettings',
+            			event: "setGlobalSettings",
             			context: uuid,
-            			payload: settings
+            			payload: settings,
             		};
             		websocket.send(JSON.stringify(json));
             	}
             }
 
             // Handle input changes
-            document.addEventListener('DOMContentLoaded', function() {
-            	document.getElementById('apiKey').addEventListener('input', function(e) {
+            document.addEventListener("DOMContentLoaded", function () {
+            	document.getElementById("apiKey").addEventListener("input", function (e) {
             		const settings = {
             			apiKey: e.target.value,
-            			host: document.getElementById('host').value || '127.0.0.1',
-            			port: parseInt(document.getElementById('port').value) || 25639
+            			host: document.getElementById("host").value || "127.0.0.1",
+            			port: parseInt(document.getElementById("port").value) || 25639,
             		};
             		setGlobalSettings(settings);
             	});
 
-            	document.getElementById('host').addEventListener('input', function(e) {
+            	document.getElementById("host").addEventListener("input", function (e) {
             		const settings = {
-            			apiKey: document.getElementById('apiKey').value,
-            			host: e.target.value || '127.0.0.1',
-            			port: parseInt(document.getElementById('port').value) || 25639
+            			apiKey: document.getElementById("apiKey").value,
+            			host: e.target.value || "127.0.0.1",
+            			port: parseInt(document.getElementById("port").value) || 25639,
             		};
             		setGlobalSettings(settings);
             	});
 
-            	document.getElementById('port').addEventListener('input', function(e) {
+            	document.getElementById("port").addEventListener("input", function (e) {
             		const settings = {
-            			apiKey: document.getElementById('apiKey').value,
-            			host: document.getElementById('host').value || '127.0.0.1',
-            			port: parseInt(e.target.value) || 25639
+            			apiKey: document.getElementById("apiKey").value,
+            			host: document.getElementById("host").value || "127.0.0.1",
+            			port: parseInt(e.target.value) || 25639,
             		};
             		setGlobalSettings(settings);
             	});

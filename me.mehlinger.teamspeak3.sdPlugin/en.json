@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "Enables basic interactions with TeamSpeak 3 using the ClientQuery plugin.\n\nSupported interactions:\n* switch channel\n* mute\n* deafen\n* toggle away status\n\nTo use this plugin, first install the ClientQuery plugin in TeamSpeak 3, then copy the API key it generates to the plugin settings in Stream Deck.",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "Toggle Mute",
+            "Tooltip": "Toggle microphone mute in TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "Toggle Deafen",
+            "Tooltip": "Toggle speaker output (deafen) in TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "Toggle Away",
+            "Tooltip": "Toggle away status in TeamSpeak 3"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "Switch Channel",
+            "Tooltip": "Switch to a specific TeamSpeak 3 channel"
+        }
+    },
+    "Localization": {
+        "ApiKey": "API Key",
+        "ApiKeyPlaceholder": "Enter your ClientQuery API key",
+        "ApiKeyDescription": "Generate an API key in TeamSpeak 3: Tools → Options → Addons → ClientQuery → Settings.",
+        "Host": "Host",
+        "HostDefault": "Default: 127.0.0.1",
+        "Port": "Port",
+        "PortDefault": "Default: 25639",
+        "ChannelName": "Channel Name",
+        "ChannelNamePlaceholder": "e.g., Lobby",
+        "ChannelNameDescription": "Enter the exact name of the TeamSpeak channel you want to switch to when this button is pressed.",
+        "ChannelPassword": "Channel Password (Optional)",
+        "ChannelPasswordPlaceholder": "Leave blank if no password",
+        "ChannelPasswordDescription": "Enter the channel password if the channel is password-protected.",
+        "ConnectionHeader": "TeamSpeak 3 Connection"
+    }
+}

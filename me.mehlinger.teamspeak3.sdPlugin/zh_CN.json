@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "通过ClientQuery插件实现与TeamSpeak 3的基本交互。\n\n支持的功能：\n* 切换频道\n* 静音\n* 关闭扬声器\n* 切换离开状态\n\n要使用此插件，请先在TeamSpeak 3中安装ClientQuery插件，然后将生成的API密钥复制到Stream Deck的插件设置中。",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "切换静音",
+            "Tooltip": "在TeamSpeak 3中切换麦克风静音"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "切换扬声器",
+            "Tooltip": "在TeamSpeak 3中切换扬声器输出"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "切换离开状态",
+            "Tooltip": "在TeamSpeak 3中切换离开状态"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "切换频道",
+            "Tooltip": "切换到指定的TeamSpeak 3频道"
+        }
+    },
+    "Localization": {
+        "ApiKey": "API密钥",
+        "ApiKeyPlaceholder": "输入您的ClientQuery API密钥",
+        "ApiKeyDescription": "在TeamSpeak 3中生成API密钥：工具 → 选项 → 插件 → ClientQuery → 设置",
+        "Host": "主机",
+        "HostDefault": "默认：127.0.0.1",
+        "Port": "端口",
+        "PortDefault": "默认：25639",
+        "ChannelName": "频道名称",
+        "ChannelNamePlaceholder": "例如：大厅",
+        "ChannelNameDescription": "输入您要切换到的TeamSpeak频道的确切名称。",
+        "ChannelPassword": "频道密码（可选）",
+        "ChannelPasswordPlaceholder": "如果没有密码请留空",
+        "ChannelPasswordDescription": "如果频道有密码保护，请输入频道密码。",
+        "ConnectionHeader": "TeamSpeak 3 连接"
+    }
+}

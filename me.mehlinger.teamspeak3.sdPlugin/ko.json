@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "ClientQuery 플러그인을 사용하여 TeamSpeak 3와 기본적인 상호작용을 가능하게 합니다.\n\n지원 기능:\n* 채널 변경\n* 음소거\n* 스피커 끄기\n* 자리비움 상태 전환\n\n이 플러그인을 사용하려면 먼저 TeamSpeak 3에 ClientQuery 플러그인을 설치한 다음, 생성된 API 키를 Stream Deck의 플러그인 설정에 복사하세요.",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "음소거 전환",
+            "Tooltip": "TeamSpeak 3에서 마이크 음소거를 전환합니다"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "스피커 전환",
+            "Tooltip": "TeamSpeak 3에서 스피커 출력을 전환합니다"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "자리비움 전환",
+            "Tooltip": "TeamSpeak 3에서 자리비움 상태를 전환합니다"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "채널 변경",
+            "Tooltip": "특정 TeamSpeak 3 채널로 전환합니다"
+        }
+    },
+    "Localization": {
+        "ApiKey": "API 키",
+        "ApiKeyPlaceholder": "ClientQuery API 키를 입력하세요",
+        "ApiKeyDescription": "TeamSpeak 3에서 API 키 생성: 도구 → 옵션 → 애드온 → ClientQuery → 설정",
+        "Host": "호스트",
+        "HostDefault": "기본값: 127.0.0.1",
+        "Port": "포트",
+        "PortDefault": "기본값: 25639",
+        "ChannelName": "채널 이름",
+        "ChannelNamePlaceholder": "예: 로비",
+        "ChannelNameDescription": "전환하려는 TeamSpeak 채널의 정확한 이름을 입력하세요.",
+        "ChannelPassword": "채널 비밀번호 (선택사항)",
+        "ChannelPasswordPlaceholder": "비밀번호가 없으면 비워두세요",
+        "ChannelPasswordDescription": "채널이 비밀번호로 보호된 경우 비밀번호를 입력하세요.",
+        "ConnectionHeader": "TeamSpeak 3 연결"
+    }
+}

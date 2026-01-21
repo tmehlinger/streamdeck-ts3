@@ -1,11 +1,6 @@
 import streamDeck from '@elgato/streamdeck';
-import {
-    action,
-    KeyDownEvent,
-    SingletonAction,
-    WillAppearEvent,
-    WillDisappearEvent,
-} from '@elgato/streamdeck';
+import { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from '@elgato/streamdeck';
+
 import { clientManager, type TS3State } from '../ts3';
 
 /**
@@ -14,12 +9,21 @@ import { clientManager, type TS3State } from '../ts3';
  */
 @action({ UUID: 'me.mehlinger.teamspeak3.toggle-deafen' })
 export class ToggleDeafen extends SingletonAction<DeafenSettings> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private visibleActions = new Set<any>();
+    /**
+     *
+     */
     private listenerRegistered = false;
+    /**
+     *
+     */
+    private visibleActions = new Map<string, KeyAction<DeafenSettings>>();
 
-    override async onWillAppear(ev: WillAppearEvent<DeafenSettings>): Promise<void> {
-        this.visibleActions.add(ev.action);
+    /**
+     * Handles the action appearing on the Stream Deck.
+     * @param ev - The will appear event.
+     */
+    public override async onWillAppear(ev: WillAppearEvent<DeafenSettings>): Promise<void> {
+        this.visibleActions.set(ev.action.id, ev.action as KeyAction<DeafenSettings>);
 
         // Register for state updates (only once)
         if (!this.listenerRegistered) {
@@ -30,24 +34,23 @@ export class ToggleDeafen extends SingletonAction<DeafenSettings> {
         // Use current cached state if available
         const state = clientManager.getState();
         if (state.outputMuted !== undefined) {
-            await this.updateDisplay(ev.action, state.outputMuted);
+            await this.updateDisplay(ev.action as KeyAction<DeafenSettings>, state.outputMuted);
         }
     }
 
-    override async onWillDisappear(ev: WillDisappearEvent<DeafenSettings>): Promise<void> {
-        this.visibleActions.delete(ev.action);
+    /**
+     * Handles the action disappearing from the Stream Deck.
+     * @param ev - The will disappear event.
+     */
+    public override async onWillDisappear(ev: WillDisappearEvent<DeafenSettings>): Promise<void> {
+        this.visibleActions.delete(ev.action.id);
     }
 
-    private async onStateChange(state: TS3State): Promise<void> {
-        if (state.outputMuted === undefined) return;
-
-        // Update all visible instances of this action
-        for (const action of this.visibleActions) {
-            await this.updateDisplay(action, state.outputMuted);
-        }
-    }
-
-    override async onKeyDown(ev: KeyDownEvent<DeafenSettings>): Promise<void> {
+    /**
+     * Handles key down events.
+     * @param ev - The key down event.
+     */
+    public override async onKeyDown(ev: KeyDownEvent<DeafenSettings>): Promise<void> {
         try {
             const client = clientManager.requireClient();
 
@@ -67,15 +70,34 @@ export class ToggleDeafen extends SingletonAction<DeafenSettings> {
         }
     }
 
-    private async updateDisplay(action: any, isDeafened: boolean): Promise<void> {
-        await action.setTitle('');
-        await action.setState(isDeafened ? 1 : 0);
+    /**
+     * Handles state changes from TeamSpeak.
+     * @param state - The new TeamSpeak state.
+     */
+    private async onStateChange(state: TS3State): Promise<void> {
+        if (state.outputMuted === undefined) return;
+
+        // Update all visible instances of this action
+        for (const actionContext of this.visibleActions.values()) {
+            await this.updateDisplay(actionContext, state.outputMuted);
+        }
+    }
+
+    /**
+     * Updates the display for an action.
+     * @param actionContext - The action context to update.
+     * @param isDeafened - Whether the speaker output is muted.
+     */
+    private async updateDisplay(actionContext: KeyAction<DeafenSettings>, isDeafened: boolean): Promise<void> {
+        await actionContext.setTitle('');
+        await actionContext.setState(isDeafened ? 1 : 0);
     }
 }
 
-/**
- * Settings for {@link ToggleDeafen}.
- */
+/** Settings for {@link ToggleDeafen}. */
 type DeafenSettings = {
+    /**
+     *
+     */
     isDeafened?: boolean;
 };

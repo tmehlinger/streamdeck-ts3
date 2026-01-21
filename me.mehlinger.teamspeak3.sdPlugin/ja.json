@@ -1,0 +1,39 @@
+{
+    "Name": "TeamSpeak 3",
+    "Description": "ClientQueryプラグインを使用してTeamSpeak 3との基本的な操作を可能にします。\n\n対応機能：\n* チャンネル切替\n* ミュート\n* スピーカーオフ\n* 離席状態の切替\n\nこのプラグインを使用するには、まずTeamSpeak 3にClientQueryプラグインをインストールし、生成されたAPIキーをStream Deckのプラグイン設定にコピーしてください。",
+    "Category": "TeamSpeak 3",
+    "Actions": {
+        "me.mehlinger.teamspeak3.toggle-mute": {
+            "Name": "ミュート切替",
+            "Tooltip": "TeamSpeak 3でマイクのミュートを切り替えます"
+        },
+        "me.mehlinger.teamspeak3.toggle-deafen": {
+            "Name": "スピーカー切替",
+            "Tooltip": "TeamSpeak 3でスピーカー出力を切り替えます"
+        },
+        "me.mehlinger.teamspeak3.toggle-away": {
+            "Name": "離席切替",
+            "Tooltip": "TeamSpeak 3で離席状態を切り替えます"
+        },
+        "me.mehlinger.teamspeak3.switch-channel": {
+            "Name": "チャンネル切替",
+            "Tooltip": "指定したTeamSpeak 3チャンネルに切り替えます"
+        }
+    },
+    "Localization": {
+        "ApiKey": "APIキー",
+        "ApiKeyPlaceholder": "ClientQuery APIキーを入力",
+        "ApiKeyDescription": "TeamSpeak 3でAPIキーを生成: ツール → オプション → アドオン → ClientQuery → 設定",
+        "Host": "ホスト",
+        "HostDefault": "デフォルト: 127.0.0.1",
+        "Port": "ポート",
+        "PortDefault": "デフォルト: 25639",
+        "ChannelName": "チャンネル名",
+        "ChannelNamePlaceholder": "例: ロビー",
+        "ChannelNameDescription": "切り替えたいTeamSpeakチャンネルの正確な名前を入力してください。",
+        "ChannelPassword": "チャンネルパスワード（任意）",
+        "ChannelPasswordPlaceholder": "パスワードがない場合は空白",
+        "ChannelPasswordDescription": "チャンネルがパスワード保護されている場合は、パスワードを入力してください。",
+        "ConnectionHeader": "TeamSpeak 3 接続"
+    }
+}

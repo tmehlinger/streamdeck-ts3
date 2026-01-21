@@ -1,11 +1,6 @@
 import streamDeck from '@elgato/streamdeck';
-import {
-    action,
-    KeyDownEvent,
-    SingletonAction,
-    WillAppearEvent,
-    WillDisappearEvent,
-} from '@elgato/streamdeck';
+import { action, KeyAction, KeyDownEvent, SingletonAction, WillAppearEvent, WillDisappearEvent } from '@elgato/streamdeck';
+
 import { clientManager, QueryClient, type TS3State } from '../ts3';
 
 /**
@@ -14,12 +9,21 @@ import { clientManager, QueryClient, type TS3State } from '../ts3';
  */
 @action({ UUID: 'me.mehlinger.teamspeak3.toggle-away' })
 export class ToggleAway extends SingletonAction<AwaySettings> {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    private visibleActions = new Set<any>();
+    /**
+     *
+     */
     private listenerRegistered = false;
+    /**
+     *
+     */
+    private visibleActions = new Map<string, KeyAction<AwaySettings>>();
 
-    override async onWillAppear(ev: WillAppearEvent<AwaySettings>): Promise<void> {
-        this.visibleActions.add(ev.action);
+    /**
+     * Handles the action appearing on the Stream Deck.
+     * @param ev - The will appear event.
+     */
+    public override async onWillAppear(ev: WillAppearEvent<AwaySettings>): Promise<void> {
+        this.visibleActions.set(ev.action.id, ev.action as KeyAction<AwaySettings>);
 
         // Set default away message if not provided
         if (!ev.payload.settings.awayMessage) {
@@ -36,24 +40,23 @@ export class ToggleAway extends SingletonAction<AwaySettings> {
         // Use current cached state if available
         const state = clientManager.getState();
         if (state.away !== undefined) {
-            await this.updateDisplay(ev.action, state.away);
+            await this.updateDisplay(ev.action as KeyAction<AwaySettings>, state.away);
         }
     }
 
-    override async onWillDisappear(ev: WillDisappearEvent<AwaySettings>): Promise<void> {
-        this.visibleActions.delete(ev.action);
+    /**
+     * Handles the action disappearing from the Stream Deck.
+     * @param ev - The will disappear event.
+     */
+    public override async onWillDisappear(ev: WillDisappearEvent<AwaySettings>): Promise<void> {
+        this.visibleActions.delete(ev.action.id);
     }
 
-    private async onStateChange(state: TS3State): Promise<void> {
-        if (state.away === undefined) return;
-
-        // Update all visible instances of this action
-        for (const action of this.visibleActions) {
-            await this.updateDisplay(action, state.away);
-        }
-    }
-
-    override async onKeyDown(ev: KeyDownEvent<AwaySettings>): Promise<void> {
+    /**
+     * Handles key down events.
+     * @param ev - The key down event.
+     */
+    public override async onKeyDown(ev: KeyDownEvent<AwaySettings>): Promise<void> {
         try {
             const client = clientManager.requireClient();
 
@@ -82,16 +85,38 @@ export class ToggleAway extends SingletonAction<AwaySettings> {
         }
     }
 
-    private async updateDisplay(action: any, isAway: boolean): Promise<void> {
-        await action.setTitle('');
-        await action.setState(isAway ? 1 : 0);
+    /**
+     * Handles state changes from TeamSpeak.
+     * @param state - The new TeamSpeak state.
+     */
+    private async onStateChange(state: TS3State): Promise<void> {
+        if (state.away === undefined) return;
+
+        // Update all visible instances of this action
+        for (const actionContext of this.visibleActions.values()) {
+            await this.updateDisplay(actionContext, state.away);
+        }
+    }
+
+    /**
+     * Updates the display for an action.
+     * @param actionContext - The action context to update.
+     * @param isAway - Whether the user is away.
+     */
+    private async updateDisplay(actionContext: KeyAction<AwaySettings>, isAway: boolean): Promise<void> {
+        await actionContext.setTitle('');
+        await actionContext.setState(isAway ? 1 : 0);
     }
 }
 
-/**
- * Settings for {@link ToggleAway}.
- */
+/** Settings for {@link ToggleAway}. */
 type AwaySettings = {
+    /**
+     *
+     */
     isAway?: boolean;
+    /**
+     *
+     */
     awayMessage?: string;
 };
