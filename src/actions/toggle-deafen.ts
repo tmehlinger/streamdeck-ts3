@@ -1,52 +1,81 @@
-import { action, KeyDownEvent, SingletonAction, WillAppearEvent } from "@elgato/streamdeck";
-import { clientManager } from "../ts3";
+import streamDeck from '@elgato/streamdeck';
+import {
+    action,
+    KeyDownEvent,
+    SingletonAction,
+    WillAppearEvent,
+    WillDisappearEvent,
+} from '@elgato/streamdeck';
+import { clientManager, type TS3State } from '../ts3';
 
 /**
  * Action to toggle speaker output (deafen) in TeamSpeak 3.
  * Uses the "clientupdate client_output_muted=<0|1>" command.
  */
-@action({ UUID: "me.mehlinger.teamspeak3.toggle-deafen" })
+@action({ UUID: 'me.mehlinger.teamspeak3.toggle-deafen' })
 export class ToggleDeafen extends SingletonAction<DeafenSettings> {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    private visibleActions = new Set<any>();
+    private listenerRegistered = false;
 
-	override async onWillAppear(ev: WillAppearEvent<DeafenSettings>): Promise<void> {
-		// Query current output mute state from TeamSpeak
-		const response = await clientManager.getClient().execute("whoami");
+    override async onWillAppear(ev: WillAppearEvent<DeafenSettings>): Promise<void> {
+        this.visibleActions.add(ev.action);
 
-		// In a real implementation, parse response.data to get client_output_muted
-		// For now, we'll use the stored setting or default to false
-		if (ev.payload.settings.isDeafened === undefined) {
-			ev.payload.settings.isDeafened = false;
-			await ev.action.setSettings(ev.payload.settings);
-		}
+        // Register for state updates (only once)
+        if (!this.listenerRegistered) {
+            this.listenerRegistered = true;
+            clientManager.onStateChange((state) => this.onStateChange(state));
+        }
 
-		// Update the title to reflect current state
-		await this.updateDisplay(ev.action, ev.payload.settings.isDeafened);
-	}
+        // Use current cached state if available
+        const state = clientManager.getState();
+        if (state.outputMuted !== undefined) {
+            await this.updateDisplay(ev.action, state.outputMuted);
+        }
+    }
 
-	override async onKeyDown(ev: KeyDownEvent<DeafenSettings>): Promise<void> {
-		const { settings } = ev.payload;
+    override async onWillDisappear(ev: WillDisappearEvent<DeafenSettings>): Promise<void> {
+        this.visibleActions.delete(ev.action);
+    }
 
-		// Toggle the deafen state
-		settings.isDeafened = !settings.isDeafened;
+    private async onStateChange(state: TS3State): Promise<void> {
+        if (state.outputMuted === undefined) return;
 
-		// Execute the TeamSpeak command (will be logged instead of executed)
-		const deafenValue = settings.isDeafened ? 1 : 0;
-		await clientManager.getClient().execute(`clientupdate client_output_muted=${deafenValue}`);
+        // Update all visible instances of this action
+        for (const action of this.visibleActions) {
+            await this.updateDisplay(action, state.outputMuted);
+        }
+    }
 
-		// Update settings and display
-		await ev.action.setSettings(settings);
-		await this.updateDisplay(ev.action, settings.isDeafened);
-	}
+    override async onKeyDown(ev: KeyDownEvent<DeafenSettings>): Promise<void> {
+        try {
+            const client = clientManager.requireClient();
 
-	private async updateDisplay(action: any, isDeafened: boolean): Promise<void> {
-		await action.setTitle("");
-		await action.setState(isDeafened ? 1 : 0);
-	}
+            // Get current state and toggle
+            const state = clientManager.getState();
+            const newDeafenState = !state.outputMuted;
+
+            // Execute the TeamSpeak command
+            const deafenValue = newDeafenState ? 1 : 0;
+            await client.execute(`clientupdate client_output_muted=${deafenValue}`);
+
+            // Optimistically update display (heartbeat will confirm)
+            await this.updateDisplay(ev.action, newDeafenState);
+        } catch (error) {
+            streamDeck.logger.error(`[TS3] Toggle deafen error: ${error}`);
+            await ev.action.showAlert();
+        }
+    }
+
+    private async updateDisplay(action: any, isDeafened: boolean): Promise<void> {
+        await action.setTitle('');
+        await action.setState(isDeafened ? 1 : 0);
+    }
 }
 
 /**
  * Settings for {@link ToggleDeafen}.
  */
 type DeafenSettings = {
-	isDeafened?: boolean;
+    isDeafened?: boolean;
 };

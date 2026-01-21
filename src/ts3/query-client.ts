@@ -1,146 +1,220 @@
-import { Telnet } from "telnet-client";
+import streamDeck from '@elgato/streamdeck';
+import * as net from 'net';
 
-const DEFAULT_HOST = "127.0.0.1";
+const DEFAULT_HOST = '127.0.0.1';
 const DEFAULT_PORT = 25639;
-const SHELL_PROMPT = /\r\n$/;
-const TIMEOUT = 5000;
+const TIMEOUT = 2000;
 
 export interface QueryClientOptions {
-	host?: string;
-	port?: number;
-	apiKey?: string;
+    host?: string;
+    port?: number;
+    apiKey?: string;
 }
 
 export interface QueryResponse {
-	data: Record<string, string>[];
-	error: {
-		id: number;
-		msg: string;
-	};
+    data: Record<string, string>[];
+    error: {
+        id: number;
+        msg: string;
+    };
 }
 
 export class QueryClient {
-	private telnet: Telnet;
-	private options: Required<QueryClientOptions>;
-	private connected = false;
+    private socket: net.Socket | null = null;
+    private options: Required<QueryClientOptions>;
+    private connected = false;
+    private buffer = '';
+    private responseResolve: ((data: string) => void) | null = null;
+    private commandQueue: Promise<QueryResponse> = Promise.resolve({ data: [], error: { id: 0, msg: 'ok' } });
 
-	constructor(options: QueryClientOptions = {}) {
-		this.telnet = new Telnet();
-		this.options = {
-			host: options.host ?? DEFAULT_HOST,
-			port: options.port ?? DEFAULT_PORT,
-			apiKey: options.apiKey ?? "",
-		};
-	}
+    constructor(options: QueryClientOptions = {}) {
+        this.options = {
+            host: options.host ?? DEFAULT_HOST,
+            port: options.port ?? DEFAULT_PORT,
+            apiKey: options.apiKey ?? '',
+        };
+    }
 
-	async connect(): Promise<void> {
-		await this.telnet.connect({
-			host: this.options.host,
-			port: this.options.port,
-			shellPrompt: SHELL_PROMPT,
-			negotiationMandatory: false,
-			timeout: TIMEOUT,
-		});
-		this.connected = true;
+    async connect(): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.socket = new net.Socket();
+            this.socket.setTimeout(TIMEOUT);
 
-		if (this.options.apiKey) {
-			await this.authenticate(this.options.apiKey);
-		}
-	}
+            this.socket.on('data', (data) => {
+                this.buffer += data.toString();
+                // Check if we have a complete response (ends with error line)
+                if (this.responseResolve && this.buffer.includes('error id=')) {
+                    const response = this.buffer;
+                    this.buffer = '';
+                    this.responseResolve(response);
+                    this.responseResolve = null;
+                }
+            });
 
-	async disconnect(): Promise<void> {
-		if (this.connected) {
-			await this.telnet.end();
-			this.connected = false;
-		}
-	}
+            this.socket.on('error', (err) => {
+                reject(err);
+            });
 
-	async authenticate(apiKey: string): Promise<void> {
-		const response = await this.execute(`auth apikey=${apiKey}`);
-		if (response.error.id !== 0) {
-			throw new Error(`Authentication failed: ${response.error.msg}`);
-		}
-	}
+            this.socket.on('close', () => {
+                this.connected = false;
+            });
 
-	async execute(command: string): Promise<QueryResponse> {
-		if (!this.connected) {
-			throw new Error("Not connected to TeamSpeak 3 ClientQuery");
-		}
+            this.socket.connect(this.options.port, this.options.host, async () => {
+                this.connected = true;
 
-		const raw = await this.telnet.exec(command);
-		return this.parseResponse(raw);
-	}
+                // Wait for the welcome banner
+                try {
+                    await this.waitForBanner();
+                    streamDeck.logger.debug('[TS3] Banner received');
 
-	private parseResponse(raw: string): QueryResponse {
-		const lines = raw.trim().split("\r\n").filter(Boolean);
-		const errorLine = lines.find((line) => line.startsWith("error "));
-		const dataLines = lines.filter((line) => !line.startsWith("error "));
+                    if (this.options.apiKey) {
+                        await this.authenticate(this.options.apiKey);
+                    }
+                    resolve();
+                } catch (err) {
+                    reject(err);
+                }
+            });
+        });
+    }
 
-		const error = this.parseErrorLine(errorLine ?? "error id=0 msg=ok");
-		const data = dataLines.flatMap((line) => this.parseDataLine(line));
+    private waitForBanner(): Promise<void> {
+        return new Promise((resolve) => {
+            const checkBanner = () => {
+                if (this.buffer.includes('selected schandlerid')) {
+                    this.buffer = '';
+                    resolve();
+                } else {
+                    setTimeout(checkBanner, 10);
+                }
+            };
+            checkBanner();
+        });
+    }
 
-		return { data, error };
-	}
+    async disconnect(): Promise<void> {
+        if (this.socket && this.connected) {
+            this.socket.destroy();
+            this.connected = false;
+        }
+    }
 
-	private parseErrorLine(line: string): QueryResponse["error"] {
-		const params = this.parseParams(line.replace(/^error\s*/, ""));
-		return {
-			id: parseInt(params.id ?? "0", 10),
-			msg: this.unescape(params.msg ?? "ok"),
-		};
-	}
+    async authenticate(apiKey: string): Promise<void> {
+        const response = await this.execute(`auth apikey=${apiKey}`);
+        if (response.error.id !== 0) {
+            throw new Error(`Authentication failed: ${response.error.msg}`);
+        }
+    }
 
-	private parseDataLine(line: string): Record<string, string>[] {
-		return line.split("|").map((entry) => {
-			const params = this.parseParams(entry);
-			const unescaped: Record<string, string> = {};
-			for (const [key, value] of Object.entries(params)) {
-				unescaped[key] = this.unescape(value);
-			}
-			return unescaped;
-		});
-	}
+    async execute(command: string): Promise<QueryResponse> {
+        if (!this.connected || !this.socket) {
+            throw new Error('Not connected to TeamSpeak 3 ClientQuery');
+        }
 
-	private parseParams(str: string): Record<string, string> {
-		const params: Record<string, string> = {};
-		const regex = /(\w+)(?:=([^\s]*))?/g;
-		let match: RegExpExecArray | null;
+        // Queue commands to prevent race conditions
+        const result = this.commandQueue.then(() => this.executeInternal(command));
+        this.commandQueue = result.catch(() => ({ data: [], error: { id: -1, msg: 'error' } }));
+        return result;
+    }
 
-		while ((match = regex.exec(str)) !== null) {
-			const [, key, value] = match;
-			params[key] = value ?? "";
-		}
+    private executeInternal(command: string): Promise<QueryResponse> {
+        return new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+                this.responseResolve = null;
+                reject(new Error(`Command timeout: ${command}`));
+            }, TIMEOUT);
 
-		return params;
-	}
+            this.responseResolve = (raw: string) => {
+                clearTimeout(timeout);
+                streamDeck.logger.debug(`[TS3] Response for "${command}": ${raw.substring(0, 200)}`);
+                resolve(this.parseResponse(raw));
+            };
 
-	private unescape(str: string): string {
-		return str
-			.replace(/\\s/g, " ")
-			.replace(/\\p/g, "|")
-			.replace(/\\n/g, "\n")
-			.replace(/\\r/g, "\r")
-			.replace(/\\t/g, "\t")
-			.replace(/\\\//g, "/")
-			.replace(/\\\\/g, "\\");
-	}
+            this.socket!.write(command + '\n');
 
-	/**
-	 * Escape special characters for TeamSpeak ClientQuery protocol.
-	 * This is a static method so it can be used by actions without a client instance.
-	 */
-	static escape(str: string): string {
-		return str
-			.replace(/\\/g, "\\\\")
-			.replace(/\//g, "\\/")
-			.replace(/\|/g, "\\p")
-			.replace(/ /g, "\\s")
-			.replace(/\n/g, "\\n")
-			.replace(/\r/g, "\\r")
-			.replace(/\t/g, "\\t");
-	}
+            // Check if response already arrived in buffer
+            if (this.buffer.includes('error id=')) {
+                const response = this.buffer;
+                this.buffer = '';
+                if (this.responseResolve) {
+                    this.responseResolve(response);
+                    this.responseResolve = null;
+                }
+            }
+        });
+    }
 
-	get isConnected(): boolean {
-		return this.connected;
-	}
+    private parseResponse(raw: string): QueryResponse {
+        // TeamSpeak uses inconsistent line endings - normalize and split
+        const lines = raw.replace(/\r/g, '').trim().split('\n').filter(Boolean);
+        const errorLine = lines.find((line) => line.startsWith('error '));
+        const dataLines = lines.filter((line) => !line.startsWith('error '));
+
+        const error = this.parseErrorLine(errorLine ?? 'error id=0 msg=ok');
+        const data = dataLines.flatMap((line) => this.parseDataLine(line));
+
+        return { data, error };
+    }
+
+    private parseErrorLine(line: string): QueryResponse['error'] {
+        const params = this.parseParams(line.replace(/^error\s*/, ''));
+        return {
+            id: parseInt(params.id ?? '0', 10),
+            msg: this.unescape(params.msg ?? 'ok'),
+        };
+    }
+
+    private parseDataLine(line: string): Record<string, string>[] {
+        return line.split('|').map((entry) => {
+            const params = this.parseParams(entry);
+            const unescaped: Record<string, string> = {};
+            for (const [key, value] of Object.entries(params)) {
+                unescaped[key] = this.unescape(value);
+            }
+            return unescaped;
+        });
+    }
+
+    private parseParams(str: string): Record<string, string> {
+        const params: Record<string, string> = {};
+        const regex = /(\w+)(?:=([^\s]*))?/g;
+        let match: RegExpExecArray | null;
+
+        while ((match = regex.exec(str)) !== null) {
+            const [, key, value] = match;
+            params[key] = value ?? '';
+        }
+
+        return params;
+    }
+
+    private unescape(str: string): string {
+        return str
+            .replace(/\\s/g, ' ')
+            .replace(/\\p/g, '|')
+            .replace(/\\n/g, '\n')
+            .replace(/\\r/g, '\r')
+            .replace(/\\t/g, '\t')
+            .replace(/\\\//g, '/')
+            .replace(/\\\\/g, '\\');
+    }
+
+    /**
+     * Escape special characters for TeamSpeak ClientQuery protocol.
+     * This is a static method so it can be used by actions without a client instance.
+     */
+    static escape(str: string): string {
+        return str
+            .replace(/\\/g, '\\\\')
+            .replace(/\//g, '\\/')
+            .replace(/\|/g, '\\p')
+            .replace(/ /g, '\\s')
+            .replace(/\n/g, '\\n')
+            .replace(/\r/g, '\\r')
+            .replace(/\t/g, '\\t');
+    }
+
+    get isConnected(): boolean {
+        return this.connected;
+    }
 }

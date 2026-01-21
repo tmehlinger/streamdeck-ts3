@@ -1,13 +1,13 @@
-import streamDeck from "@elgato/streamdeck";
+import streamDeck from '@elgato/streamdeck';
 
-import { ToggleMute } from "./actions/toggle-mute";
-import { ToggleDeafen } from "./actions/toggle-deafen";
-import { ToggleAway } from "./actions/toggle-away";
-import { SwitchChannel } from "./actions/switch-channel";
-import { clientManager } from "./ts3";
+import { ToggleMute } from './actions/toggle-mute';
+import { ToggleDeafen } from './actions/toggle-deafen';
+import { ToggleAway } from './actions/toggle-away';
+import { SwitchChannel } from './actions/switch-channel';
+import { clientManager } from './ts3';
 
-// Set log level to info to avoid TRACE logs
-streamDeck.logger.setLevel("info");
+// Set log level
+streamDeck.logger.setLevel('info');
 
 // Initialize the TeamSpeak 3 client manager
 clientManager.initialize();
@@ -20,5 +20,5 @@ streamDeck.actions.registerAction(new SwitchChannel());
 
 // Finally, connect to the Stream Deck.
 streamDeck.connect().then(() => {
-	streamDeck.logger.info("=== TeamSpeak 3 Plugin Connected ===");
+    streamDeck.logger.info('=== TeamSpeak 3 Plugin Connected ===');
 });

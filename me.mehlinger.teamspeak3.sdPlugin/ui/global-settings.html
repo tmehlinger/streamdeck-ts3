@@ -1,170 +1,167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html>
-<head>
-	<meta charset="utf-8" />
-	<title>TeamSpeak 3 Global Settings</title>
-	<style>
-		body {
-			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-			padding: 10px;
-			margin: 0;
-			background: transparent;
-		}
-		.sdpi-wrapper {
-			padding: 0;
-		}
-		.sdpi-item {
-			margin-bottom: 15px;
-		}
-		.sdpi-item-label {
-			display: block;
-			margin-bottom: 5px;
-			font-size: 12px;
-			font-weight: 500;
-			color: #d4d4d4;
-		}
-		.sdpi-item-value input {
-			width: 100%;
-			padding: 6px 8px;
-			font-size: 12px;
-			background: #3a3a3a;
-			border: 1px solid #505050;
-			border-radius: 3px;
-			color: #d4d4d4;
-			box-sizing: border-box;
-		}
-		.sdpi-item-value input:focus {
-			outline: none;
-			border-color: #0e94eb;
-		}
-		.sdpi-item-description {
-			font-size: 11px;
-			color: #969696;
-			margin-top: 5px;
-			line-height: 1.4;
-		}
-	</style>
-</head>
-<body>
-	<div class="sdpi-wrapper">
-		<div class="sdpi-item">
-			<div class="sdpi-item-label">TeamSpeak 3 API Key</div>
-			<div class="sdpi-item-value">
-				<input type="password" id="apiKey" placeholder="Enter your ClientQuery API key">
-			</div>
-			<div class="sdpi-item-description">
-				You can generate an API key in TeamSpeak 3 by going to Tools → Options → Addons → ClientQuery → Settings.
-			</div>
-		</div>
-		<div class="sdpi-item">
-			<div class="sdpi-item-label">Host</div>
-			<div class="sdpi-item-value">
-				<input type="text" id="host" placeholder="127.0.0.1">
-			</div>
-			<div class="sdpi-item-description">
-				Default: 127.0.0.1
-			</div>
-		</div>
-		<div class="sdpi-item">
-			<div class="sdpi-item-label">Port</div>
-			<div class="sdpi-item-value">
-				<input type="number" id="port" placeholder="25639">
-			</div>
-			<div class="sdpi-item-description">
-				Default: 25639
-			</div>
-		</div>
-	</div>
+    <head>
+        <meta charset="utf-8" />
+        <title>TeamSpeak 3 Global Settings</title>
+        <style>
+            body {
+            	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            	padding: 10px;
+            	margin: 0;
+            	background: transparent;
+            }
+            .sdpi-wrapper {
+            	padding: 0;
+            }
+            .sdpi-item {
+            	margin-bottom: 15px;
+            }
+            .sdpi-item-label {
+            	display: block;
+            	margin-bottom: 5px;
+            	font-size: 12px;
+            	font-weight: 500;
+            	color: #d4d4d4;
+            }
+            .sdpi-item-value input {
+            	width: 100%;
+            	padding: 6px 8px;
+            	font-size: 12px;
+            	background: #3a3a3a;
+            	border: 1px solid #505050;
+            	border-radius: 3px;
+            	color: #d4d4d4;
+            	box-sizing: border-box;
+            }
+            .sdpi-item-value input:focus {
+            	outline: none;
+            	border-color: #0e94eb;
+            }
+            .sdpi-item-description {
+            	font-size: 11px;
+            	color: #969696;
+            	margin-top: 5px;
+            	line-height: 1.4;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="sdpi-wrapper">
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">TeamSpeak 3 API Key</div>
+                <div class="sdpi-item-value">
+                    <input type="password" id="apiKey" placeholder="Enter your ClientQuery API key" />
+                </div>
+                <div class="sdpi-item-description">
+                    You can generate an API key in TeamSpeak 3 by going to Tools → Options → Addons → ClientQuery →
+                    Settings.
+                </div>
+            </div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">Host</div>
+                <div class="sdpi-item-value">
+                    <input type="text" id="host" placeholder="127.0.0.1" />
+                </div>
+                <div class="sdpi-item-description">Default: 127.0.0.1</div>
+            </div>
+            <div class="sdpi-item">
+                <div class="sdpi-item-label">Port</div>
+                <div class="sdpi-item-value">
+                    <input type="number" id="port" placeholder="25639" />
+                </div>
+                <div class="sdpi-item-description">Default: 25639</div>
+            </div>
+        </div>
 
-	<script>
-		let websocket = null;
-		let uuid = null;
+        <script>
+            let websocket = null;
+            let uuid = null;
 
-		function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
-			uuid = inUUID;
-			websocket = new WebSocket('ws://127.0.0.1:' + inPort);
+            function connectElgatoStreamDeckSocket(inPort, inUUID, inRegisterEvent, inInfo, inActionInfo) {
+            	uuid = inUUID;
+            	websocket = new WebSocket('ws://127.0.0.1:' + inPort);
 
-			websocket.onopen = function() {
-				const json = {
-					event: inRegisterEvent,
-					uuid: inUUID
-				};
-				websocket.send(JSON.stringify(json));
+            	websocket.onopen = function() {
+            		const json = {
+            			event: inRegisterEvent,
+            			uuid: inUUID
+            		};
+            		websocket.send(JSON.stringify(json));
 
-				// Request current global settings
-				requestGlobalSettings();
-			};
+            		// Request current global settings
+            		requestGlobalSettings();
+            	};
 
-			websocket.onmessage = function(evt) {
-				const jsonObj = JSON.parse(evt.data);
+            	websocket.onmessage = function(evt) {
+            		const jsonObj = JSON.parse(evt.data);
 
-				if (jsonObj.event === 'didReceiveGlobalSettings') {
-					const settings = jsonObj.payload.settings;
+            		if (jsonObj.event === 'didReceiveGlobalSettings') {
+            			const settings = jsonObj.payload.settings;
 
-					// Update UI with current settings
-					if (settings.apiKey) {
-						document.getElementById('apiKey').value = settings.apiKey;
-					}
-					if (settings.host) {
-						document.getElementById('host').value = settings.host;
-					}
-					if (settings.port) {
-						document.getElementById('port').value = settings.port;
-					}
-				}
-			};
-		}
+            			// Update UI with current settings
+            			if (settings.apiKey) {
+            				document.getElementById('apiKey').value = settings.apiKey;
+            			}
+            			if (settings.host) {
+            				document.getElementById('host').value = settings.host;
+            			}
+            			if (settings.port) {
+            				document.getElementById('port').value = settings.port;
+            			}
+            		}
+            	};
+            }
 
-		function requestGlobalSettings() {
-			if (websocket) {
-				const json = {
-					event: 'getGlobalSettings',
-					context: uuid
-				};
-				websocket.send(JSON.stringify(json));
-			}
-		}
+            function requestGlobalSettings() {
+            	if (websocket) {
+            		const json = {
+            			event: 'getGlobalSettings',
+            			context: uuid
+            		};
+            		websocket.send(JSON.stringify(json));
+            	}
+            }
 
-		function setGlobalSettings(settings) {
-			if (websocket) {
-				const json = {
-					event: 'setGlobalSettings',
-					context: uuid,
-					payload: settings
-				};
-				websocket.send(JSON.stringify(json));
-			}
-		}
+            function setGlobalSettings(settings) {
+            	if (websocket) {
+            		const json = {
+            			event: 'setGlobalSettings',
+            			context: uuid,
+            			payload: settings
+            		};
+            		websocket.send(JSON.stringify(json));
+            	}
+            }
 
-		// Handle input changes
-		document.addEventListener('DOMContentLoaded', function() {
-			document.getElementById('apiKey').addEventListener('input', function(e) {
-				const settings = {
-					apiKey: e.target.value,
-					host: document.getElementById('host').value || '127.0.0.1',
-					port: parseInt(document.getElementById('port').value) || 25639
-				};
-				setGlobalSettings(settings);
-			});
+            // Handle input changes
+            document.addEventListener('DOMContentLoaded', function() {
+            	document.getElementById('apiKey').addEventListener('input', function(e) {
+            		const settings = {
+            			apiKey: e.target.value,
+            			host: document.getElementById('host').value || '127.0.0.1',
+            			port: parseInt(document.getElementById('port').value) || 25639
+            		};
+            		setGlobalSettings(settings);
+            	});
 
-			document.getElementById('host').addEventListener('input', function(e) {
-				const settings = {
-					apiKey: document.getElementById('apiKey').value,
-					host: e.target.value || '127.0.0.1',
-					port: parseInt(document.getElementById('port').value) || 25639
-				};
-				setGlobalSettings(settings);
-			});
+            	document.getElementById('host').addEventListener('input', function(e) {
+            		const settings = {
+            			apiKey: document.getElementById('apiKey').value,
+            			host: e.target.value || '127.0.0.1',
+            			port: parseInt(document.getElementById('port').value) || 25639
+            		};
+            		setGlobalSettings(settings);
+            	});
 
-			document.getElementById('port').addEventListener('input', function(e) {
-				const settings = {
-					apiKey: document.getElementById('apiKey').value,
-					host: document.getElementById('host').value || '127.0.0.1',
-					port: parseInt(e.target.value) || 25639
-				};
-				setGlobalSettings(settings);
-			});
-		});
-	</script>
-</body>
+            	document.getElementById('port').addEventListener('input', function(e) {
+            		const settings = {
+            			apiKey: document.getElementById('apiKey').value,
+            			host: document.getElementById('host').value || '127.0.0.1',
+            			port: parseInt(e.target.value) || 25639
+            		};
+            		setGlobalSettings(settings);
+            	});
+            });
+        </script>
+    </body>
 </html>
