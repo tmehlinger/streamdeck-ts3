@@ -73,7 +73,7 @@
     "CategoryIcon": "imgs/plugin/teamspeak",
     "CodePath": "bin/plugin.js",
     "Description": "Enables basic interactions with TeamSpeak 3 using the ClientQuery plugin.\n\nSupported interactions:\n* switch channel\n* mute\n* deafen\n* toggle away status\n\nTo use this plugin, first install the ClientQuery plugin in TeamSpeak 3, then copy the API key it generates to the plugin settings in Stream Deck.",
-    "URL": "https://mehlinger.me/projects/streamdeck-ts3",
+    "URL": "https://github.com/tmehlinger/streamdeck-ts3",
     "Icon": "imgs/plugin/teamspeak",
     "PropertyInspectorPath": "ui/global-settings.html",
     "SDKVersion": 3,
