@@ -8,14 +8,16 @@
             "UUID": "me.mehlinger.teamspeak3.toggle-mute",
             "Icon": "imgs/actions/mute/icon",
             "Tooltip": "Toggle microphone mute in TeamSpeak 3",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/mute/icon",
                     "TitleAlignment": "middle"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/mute/icon",
                     "TitleAlignment": "middle"
                 }
             ]
@@ -25,14 +27,16 @@
             "UUID": "me.mehlinger.teamspeak3.toggle-deafen",
             "Icon": "imgs/actions/deafen/icon",
             "Tooltip": "Toggle speaker output (deafen) in TeamSpeak 3",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/deafen/icon",
                     "TitleAlignment": "middle"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/deafen/icon",
                     "TitleAlignment": "middle"
                 }
             ]
@@ -42,14 +46,16 @@
             "UUID": "me.mehlinger.teamspeak3.toggle-away",
             "Icon": "imgs/actions/away/icon",
             "Tooltip": "Toggle away status in TeamSpeak 3",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/away/icon",
                     "TitleAlignment": "middle"
                 },
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/away/icon",
                     "TitleAlignment": "middle"
                 }
             ]
@@ -60,10 +66,12 @@
             "Icon": "imgs/actions/switch-channel/icon",
             "Tooltip": "Switch to a specific TeamSpeak 3 channel",
             "PropertyInspectorPath": "ui/switch-channel.html",
-            "Controllers": ["Keypad"],
+            "Controllers": [
+                "Keypad"
+            ],
             "States": [
                 {
-                    "Image": "imgs/actions/counter/key",
+                    "Image": "imgs/actions/switch-channel/icon",
                     "TitleAlignment": "middle"
                 }
             ]
